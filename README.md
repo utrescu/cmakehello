@@ -1,4 +1,4 @@
-# Hello World amb CMake
+# Projectes de C++ amb CMake
 
 ## CMake
 
@@ -63,3 +63,65 @@ Després s'ha d'executar el programa amb els botons que surten a la barra inferi
 Per defecte l'executable sortirà en la carpeta `build`
 
 
+## Exemples
+
+### 1-Hola mundo
+
+[Carpeta](1-Hola Mundo/)
+
+Exemple bàsic que genera un Hello World a partir del número rebut a partir de la línia de comandes
+
+```bash
+$ echo 2 > data.txt
+$ ./programa < data.txt
+Hola mundo.
+Hola mundo.
+```
+
+### 2-calle 
+
+[Carpeta](2-calle/)
+
+Determina si una llista de números de carrer estan a l'esquerra o a la dreta
+
+```bash
+$ echo 23 > data.txt
+$ echo 2 >> data.txt
+$ echo 0 >> data.txt
+$ ./programa < data.txt
+UZQUIERDA
+DERECHA
+```
+
+En aquest projecte s'hi ha afegit la opció de fer tests que es poden avaluar amb CTest
+
+```bash
+$ ctest 
+Test project /home/xavier/work-personal/programming/programame/02-calle/build
+    Start 1: data1
+1/4 Test #1: data1 ............................   Passed    0.02 sec
+    Start 2: data2
+2/4 Test #2: data2 ............................   Passed    0.01 sec
+    Start 3: data34
+3/4 Test #3: data34 ...........................   Passed    0.01 sec
+    Start 4: data45
+4/4 Test #4: data45 ...........................***Failed  Required regular expression not found. Regex=[^IZQUIERDA[
+        ]*DERECHA[
+        ]*IZQUIERDA[
+        ]*DERECHA[
+        ]*IZQUIERDA[
+        ]*$
+]  0.01 sec
+
+75% tests passed, 1 tests failed out of 4
+
+Total Test time (real) =   0.05 sec
+
+The following tests FAILED:
+          4 - data45 (Failed)
+Errors while running CTest
+Output from these tests are in: /home/xavier/work-personal/programming/programame/02-calle/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+```
+
+Com diu, dóna més detalls del que ha fallat si s'executa amb els paràmetres.
