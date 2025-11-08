@@ -34,14 +34,49 @@ Hola mundo.
 
 ## Testos de programari
 
-En aquest projecte s'ha afegit la carpeta tests en la que es poden definir
-tests per comprovar que el programa està funcionant correctament
+Com que CMake va sobre automatització de programari (normalment construir el
+projecte i instal·lar-lo) també suporta altres coses com empaquetat de programari
+amb CPack i execució de testos amb CTest.
 
-La carpeta tests té el seu propi fitxer `CMakeLists.txt` que se n'encarrega
-de generar-los.
+Normalment no n'hi sol haver prou amb que el programa hagi compilat sinó que el
+que es busca és que el programa faci el que ha de fer correctament. Per tant a
+CMake hi han tota una sèrie de funcions per ajudar a la creació de tests de forma
+senzilla, i després es registren a través del component CTest.
 
-Els tests són arxius de text on hi ha una llista de números de carrer que
-s'ha d'avaluar. Segons l'enunciat ha d'acabar en zero
+Un dels avantatges de fer tests amb CMake és que no et força afer servir cap
+framework de tests. De fet, es poden fer tests sense fer-ne servir cap! Només
+fent servir les funcions que ofereix es poden fer tests.
+
+Per executar els tests amb CTest només cal executar-ne la eina `ctest` i
+per pantalla sortirà el resultat de lexecució de cada un dels tests: si han
+passat, si han fallat, etc...
+
+CTest es pot integrar amb els framework de tests de programari però per fer
+tests bàsics es pot fer sense usar-ne cap (com es fa aquí)
+
+### Tests del projecte
+
+En el CMakeList.txt principal s'activen els tests `enable_testing()` i per
+facilitar el manteniment es crea un nou CMakeLists.txt` en la carpeta de
+tests que activem afegint-li el directori on hi haurà els tests.
+
+```cmake
+...
+
+enable_testing()
+add_subdirectory(tests)
+```
+
+Per tant la carpeta `tests` serà la que contindrà els tests. En aquesta
+carpeta s'hi crea el fitxer de creació `CMakeLists.txt` i s'hi defineixen
+els tests que es volen fer amb instruccions CMake.
+
+Quan es generin les instruccions de construcció del projecte també es
+generaran els tests.
+
+En el aquest exemple els tests s'han adaptat a l'enunciat del problema. Són
+arxius de text on hi ha la llista de números de carrer que s'ha d'avaluar
+acabant amb un zero.
 
 ```bash
 $ cat data2.txt
@@ -50,10 +85,34 @@ $ cat data2.txt
 0
 ```
 
-Es poden exeutar els tests amb `ctest`
+Es poden crear tants arxius com calgui però s'hauran de referenciar en el
+fitxer `CMakeLists.txt`.
+
+Per evitar repeticions de codi he definit un mètode per afegir nous
+tests anomenada `execute_tests()`-
+
+La funció rep com a paràmetres:
+
+- El nom del fitxer que es farà servir en el test
+- El resultat esperat (amb els salts de línia corresponents)
+
+```cmake
+execute_test("data.txt, "IZQUIERDA\nDERECHA\n)
+```
+
+Si s'afegeixen nous tests s'ha de regenerar el codi:
 
 ```bash
- ctest
+cd build
+cmake ..
+```
+
+## Execució dels tests
+
+Es poden exeutar els tests amb la comanda que proporciona cmake: `ctest`
+
+```bash
+$ ctest
 Test project /home/xavier/work-personal/programming/programame/01-helloworld/2-calle/build
     Start 1: data1
 1/4 Test #1: data1 ............................   Passed    0.01 sec
@@ -67,44 +126,4 @@ Test project /home/xavier/work-personal/programming/programame/01-helloworld/2-c
 100% tests passed, 0 tests failed out of 4
 
 Total Test time (real) =   0.03 sec
-```
-
-## Afegir nous tests
-
-Per fer un nou test només cal afegir un arxiu de dades nou,i anar al
-fitxer `tests/CMakeLists.txt` i afegir-hi el test:
-
-Bàsicament és afegir una línia **execute_test()** amb els paràmetres (és una
-funció que he definit per no haver de repetir codi):
-
-- nom de l'arxiu
-- resultat esperat (amb **\n** pels salts de línia)
-
-```cmake
-function (execute_test data result)
-    get_filename_component(test_name ${data} NAME_WE)
-    add_test(NAME ${test_name} COMMAND sh -c "cat ${CMAKE_CURRENT_SOURCE_DIR}/${data} | ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
-
-    set(input "^${result}$")
-    string(REPLACE "\n" "[\n\r\t]*" expected "${input}")
-
-    set_tests_properties(${test_name} PROPERTIES
-        PASS_REGULAR_EXPRESSION "${expected}")
-endfunction()
-
-#
-# Definir els tests
-# ----------------------------------------------
-
-execute_test("data1.txt" "IZQUIERDA\n")
-execute_test("data2.txt" "DERECHA\nDERECHA\n")
-execute_test("data34.txt" "DERECHA\nDERECHA\nDERECHA\nIZQUIERDA\n")
-execute_test("data45.txt" "IZQUIERDA\nDERECHA\nIZQUIERDA\nDERECHA\nIZQUIERDA\n")
-```
-
-Abans de que sigui reconegut s'ha de reconstruir el projecte perquè generi el codi
-del test:
-
-```bash
-cmake ..
 ```
